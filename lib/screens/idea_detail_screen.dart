@@ -42,6 +42,11 @@ class IdeaDetailScreen extends StatelessWidget {
           appBar: AppBar(
             title: const Text('灵感详情'),
             actions: [
+              // 编辑按钮
+              IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _showEditDialog(context, idea),
+              ),
               PopupMenuButton<String>(
                 onSelected: (value) async {
                   if (value == 'delete') {
@@ -223,6 +228,96 @@ class IdeaDetailScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _showEditDialog(BuildContext context, Idea idea) async {
+    final titleController = TextEditingController(text: idea.title);
+    final contentController = TextEditingController(text: idea.content);
+    String selectedCategory = idea.category;
+
+    // 获取分类列表
+    final categoryProvider = context.read<CategoryProvider>();
+    final categories = categoryProvider.categories;
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('编辑灵感'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(
+                    labelText: '标题',
+                    hintText: '请输入标题',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: contentController,
+                  decoration: const InputDecoration(
+                    labelText: '内容',
+                    hintText: '请输入内容',
+                  ),
+                  maxLines: 5,
+                ),
+                const SizedBox(height: 16),
+                // 分类选择
+                const Text('分类', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: categories.map((cat) {
+                    final isSelected = cat.id == selectedCategory;
+                    return ChoiceChip(
+                      label: Text(cat.name),
+                      selected: isSelected,
+                      selectedColor: Color(cat.colorValue).withOpacity(0.3),
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() => selectedCategory = cat.id);
+                        }
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('取消'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('保存'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result == true) {
+      final provider = context.read<IdeaProvider>();
+      // 使用copyWith更新灵感
+      final updatedIdea = idea.copyWith(
+        title: titleController.text,
+        content: contentController.text,
+        category: selectedCategory,
+      );
+      await provider.updateIdea(updatedIdea);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('灵感已更新')),
+        );
+      }
+    }
   }
 
   Future<void> _showConvertToProjectDialog(BuildContext context, Idea idea) async {

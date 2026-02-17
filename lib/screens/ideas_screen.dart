@@ -49,7 +49,7 @@ class _IdeasScreenState extends State<IdeasScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: '搜索灵感...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(Icons.search, color: AppTheme.textSecondary),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear),
@@ -137,7 +137,7 @@ class _IdeasScreenState extends State<IdeasScreen> {
                         Icon(
                           Icons.search_off,
                           size: 60,
-                          color: Colors.grey.shade300,
+                          color: AppTheme.textSecondary,
                         ),
                         const SizedBox(height: 16),
                         Text(

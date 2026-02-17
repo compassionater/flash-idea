@@ -28,62 +28,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
-        title: const Text('灵感闪记'),
+        backgroundColor: AppTheme.background,
+        elevation: 0,
+        title: const Text(
+          '灵感闪记',
+          style: TextStyle(
+            color: AppTheme.textPrimary,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        titleSpacing: 20,
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // 顶部标题
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '灵感闪记',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Consumer<IdeaProvider>(
-                        builder: (context, provider, _) {
-                          return Text(
-                            '记录了 ${provider.allIdeas.length} 个灵感',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppTheme.textSecondary,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            // 最近灵感标题
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Text(
-                    '最近灵感',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppTheme.textPrimary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
             // 灵感列表
             Expanded(
               child: Consumer2<IdeaProvider, CategoryProvider>(
@@ -91,30 +51,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   final ideas = ideaProvider.allIdeas;
 
                   if (ideas.isEmpty) {
-                    return Center(
+                    // 空状态 - 只显示一个简洁的灯泡图标
+                    return const Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.lightbulb_outline,
-                            size: 80,
-                            color: Colors.grey.shade300,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            '还没有灵感',
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey.shade400,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            '点击下方按钮记录第一个灵感',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade400,
-                            ),
+                            size: 60,
+                            color: AppTheme.textSecondary,
                           ),
                         ],
                       ),
@@ -122,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 120),
+                    padding: const EdgeInsets.only(top: 8, bottom: 120),
                     itemCount: ideas.length,
                     itemBuilder: (context, index) {
                       final idea = ideas[index];

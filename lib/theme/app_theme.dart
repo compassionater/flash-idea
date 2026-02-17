@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // 主色调 - 蓝紫渐变
-  static const Color primaryStart = Color(0xFF667EEA);  // 蓝紫
-  static const Color primaryEnd = Color(0xFFF56565);     // 粉红
+  // 主色调 - 竹子幽光青色（降低饱和度）
+  static const Color accent = Color(0xFF5DADE2);
+  static const Color primaryStart = accent;
+  static const Color primaryEnd = Color(0xFF76D7C4);
 
   // 背景色
   static const Color background = Color(0xFFF8F9FA);
@@ -13,24 +14,28 @@ class AppTheme {
   static const Color textPrimary = Color(0xFF2D3748);
   static const Color textSecondary = Color(0xFF718096);
 
+  // 次要颜色 - 更低饱和度
+  static const Color secondary = Color(0xFF76D7C4);
+  static const Color secondaryLight = Color(0xFFA9DFBF);
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: background,
       colorScheme: ColorScheme.light(
-        primary: primaryStart,
-        secondary: primaryEnd,
+        primary: accent,
+        secondary: secondary,
         surface: surfaceColor,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: background,
         elevation: 0,
-        centerTitle: true,
+        centerTitle: false,
         titleTextStyle: TextStyle(
           color: textPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
         ),
         iconTheme: IconThemeData(color: textPrimary),
       ),
@@ -72,15 +77,15 @@ class AppTheme {
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: primaryStart,
+        backgroundColor: accent,
         foregroundColor: Colors.white,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: surfaceColor,
-        selectedItemColor: primaryStart,
+        selectedItemColor: accent,
         unselectedItemColor: textSecondary,
         type: BottomNavigationBarType.fixed,
-        elevation: 8,
+        elevation: 0,
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
@@ -95,13 +100,13 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primaryStart, width: 2),
+          borderSide: const BorderSide(color: accent, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primaryStart,
+          backgroundColor: accent,
           foregroundColor: Colors.white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -115,13 +120,13 @@ class AppTheme {
 
   // 渐变色
   static LinearGradient get primaryGradient => const LinearGradient(
-        colors: [primaryStart, primaryEnd],
+        colors: [accent, Color(0xFF00E5FF)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
 
   static LinearGradient get buttonGradient => const LinearGradient(
-        colors: [primaryStart, primaryEnd],
+        colors: [accent, Color(0xFF00E5FF)],
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
       );

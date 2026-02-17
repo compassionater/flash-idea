@@ -124,7 +124,7 @@ class IdeaCard extends StatelessWidget {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.folder_outlined, size: 14, color: AppTheme.primaryStart),
+                      Icon(Icons.folder_outlined, size: 14, color: AppTheme.accent),
                       SizedBox(width: 4),
                       Text(
                         '已转为选题',
@@ -152,15 +152,15 @@ class IdeaCard extends StatelessWidget {
     switch (idea.recordingType) {
       case 'image':
         icon = Icons.image_outlined;
-        color = Colors.green;
+        color = AppTheme.secondary;
         break;
       case 'audio':
         icon = Icons.mic_outlined;
-        color = Colors.orange;
+        color = AppTheme.secondary;
         break;
       default:
         icon = Icons.edit_outlined;
-        color = AppTheme.primaryStart;
+        color = AppTheme.accent;
     }
 
     return Icon(icon, size: 18, color: color);
