@@ -35,18 +35,18 @@ class IdeaCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  // 分类标签
+                  // 分类标签 - 单色系
                   if (category != null)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Color(category!.colorValue).withOpacity(0.15),
+                        color: AppTheme.rockGrayLight,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         category!.name,
-                        style: TextStyle(
-                          color: Color(category!.colorValue),
+                        style: const TextStyle(
+                          color: AppTheme.rockGrayDark,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
@@ -152,15 +152,15 @@ class IdeaCard extends StatelessWidget {
     switch (idea.recordingType) {
       case 'image':
         icon = Icons.image_outlined;
-        color = AppTheme.secondary;
+        color = AppTheme.textSecondary;
         break;
       case 'audio':
         icon = Icons.mic_outlined;
-        color = AppTheme.secondary;
+        color = AppTheme.textSecondary;
         break;
       default:
         icon = Icons.edit_outlined;
-        color = AppTheme.accent;
+        color = AppTheme.textSecondary;
     }
 
     return Icon(icon, size: 18, color: color);

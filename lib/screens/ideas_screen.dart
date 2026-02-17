@@ -179,15 +179,6 @@ class _IdeasScreenState extends State<IdeasScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CaptureScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 
@@ -205,14 +196,14 @@ class _IdeasScreenState extends State<IdeasScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: isSelected
-                ? (color ?? AppTheme.primaryStart)
-                : (color ?? AppTheme.primaryStart).withOpacity(0.1),
+                ? AppTheme.accent
+                : AppTheme.rockGrayLight,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
             label,
             style: TextStyle(
-              color: isSelected ? Colors.white : (color ?? AppTheme.primaryStart),
+              color: isSelected ? Colors.white : AppTheme.rockGrayDark,
               fontWeight: FontWeight.w500,
             ),
           ),

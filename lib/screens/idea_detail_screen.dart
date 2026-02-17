@@ -118,13 +118,13 @@ class IdeaDetailScreen extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Color(category.colorValue).withOpacity(0.15),
+                          color: AppTheme.rockGrayLight,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Text(
                           category.name,
-                          style: TextStyle(
-                            color: Color(category.colorValue),
+                          style: const TextStyle(
+                            color: AppTheme.rockGrayDark,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -276,7 +276,7 @@ class IdeaDetailScreen extends StatelessWidget {
                     return ChoiceChip(
                       label: Text(cat.name),
                       selected: isSelected,
-                      selectedColor: Color(cat.colorValue).withOpacity(0.3),
+                      selectedColor: AppTheme.accent.withOpacity(0.2),
                       onSelected: (selected) {
                         if (selected) {
                           setState(() => selectedCategory = cat.id);

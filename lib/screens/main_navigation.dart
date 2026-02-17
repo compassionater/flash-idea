@@ -28,13 +28,10 @@ class _MainNavigationState extends State<MainNavigation> {
         index: _currentIndex,
         children: _screens,
       ),
+      // 极简底部条
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -43,47 +40,17 @@ class _MainNavigationState extends State<MainNavigation> {
             ),
           ],
         ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            selectedItemColor: AppTheme.secondary, // 青色
-            unselectedItemColor: AppTheme.textSecondary, // 柔和灰色
-            selectedLabelStyle: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(0, Icons.home_outlined, Icons.home, '首页'),
+                _buildNavItem(1, Icons.lightbulb_outlined, Icons.lightbulb, '灵感'),
+                _buildNavItem(2, Icons.folder_outlined, Icons.folder, '选题'),
+              ],
             ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 12,
-            ),
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: '首页',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.lightbulb_outline),
-                activeIcon: Icon(Icons.lightbulb),
-                label: '灵感',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.folder_outlined),
-                activeIcon: Icon(Icons.folder),
-                label: '选题',
-              ),
-            ],
           ),
         ),
       ),
@@ -91,18 +58,49 @@ class _MainNavigationState extends State<MainNavigation> {
     );
   }
 
+  Widget _buildNavItem(int index, IconData icon, IconData activeIcon, String label) {
+    final isSelected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? activeIcon : icon,
+              color: isSelected ? AppTheme.accent : AppTheme.textSecondary,
+              size: 24,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? AppTheme.accent : AppTheme.textSecondary,
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDrawer() {
     return Drawer(
+      backgroundColor: Colors.white,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFF667EEA), Color(0xFFF56565)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
+              color: AppTheme.accent,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -140,8 +138,8 @@ class _MainNavigationState extends State<MainNavigation> {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.category_outlined),
-            title: const Text('分类管理'),
+            leading: const Icon(Icons.category_outlined, color: AppTheme.textPrimary),
+            title: const Text('分类管理', style: TextStyle(color: AppTheme.textPrimary)),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -152,16 +150,16 @@ class _MainNavigationState extends State<MainNavigation> {
               );
             },
           ),
-          const Divider(),
+          const Divider(color: AppTheme.rockGrayLight),
           ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('关于'),
+            leading: const Icon(Icons.info_outline, color: AppTheme.textPrimary),
+            title: const Text('关于', style: TextStyle(color: AppTheme.textPrimary)),
             onTap: () {
               Navigator.pop(context);
               showAboutDialog(
                 context: context,
                 applicationName: '灵感闪记',
-                applicationVersion: '1.0.0',
+                applicationVersion: '1.1.0',
                 applicationLegalese: '© 2024 FlashIdea',
                 children: [
                   const SizedBox(height: 16),

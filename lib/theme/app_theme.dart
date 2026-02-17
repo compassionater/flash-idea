@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // 主色调 - 竹子幽光青色（降低饱和度）
-  static const Color accent = Color(0xFF5DADE2);
+  // 主色调 - 青色 Teal
+  static const Color accent = Color(0xFF26A69A);
   static const Color primaryStart = accent;
-  static const Color primaryEnd = Color(0xFF76D7C4);
+  static const Color primaryEnd = Color(0xFF4DB6AC);
+
+  // 岩灰配色 - 单色系
+  static const Color rockGrayLight = Color(0xFFF1F5F9);  // 浅岩灰背景
+  static const Color rockGrayDark = Color(0xFF475569);   // 深岩灰文字
 
   // 背景色
   static const Color background = Color(0xFFF8F9FA);
   static const Color surfaceColor = Colors.white;
 
   // 文字颜色
-  static const Color textPrimary = Color(0xFF2D3748);
+  static const Color textPrimary = rockGrayDark;
   static const Color textSecondary = Color(0xFF718096);
 
-  // 次要颜色 - 更低饱和度
-  static const Color secondary = Color(0xFF76D7C4);
-  static const Color secondaryLight = Color(0xFFA9DFBF);
+  // 次要颜色
+  static const Color secondary = Color(0xFF80CBC4);
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -71,9 +74,10 @@ class AppTheme {
       ),
       cardTheme: CardTheme(
         color: surfaceColor,
-        elevation: 2,
+        elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.grey.shade200),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -89,7 +93,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: surfaceColor,
+        fillColor: rockGrayLight,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -120,13 +124,13 @@ class AppTheme {
 
   // 渐变色
   static LinearGradient get primaryGradient => const LinearGradient(
-        colors: [accent, Color(0xFF00E5FF)],
+        colors: [accent, Color(0xFF4DB6AC)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
 
   static LinearGradient get buttonGradient => const LinearGradient(
-        colors: [accent, Color(0xFF00E5FF)],
+        colors: [accent, Color(0xFF4DB6AC)],
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
       );
