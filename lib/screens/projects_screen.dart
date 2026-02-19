@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import '../providers/project_provider.dart';
+import '../providers/idea_provider.dart';
+import '../providers/category_provider.dart';
+import '../models/idea.dart';
 import '../theme/app_theme.dart';
-import 'project_detail_screen.dart';
+import 'idea_detail_screen.dart';
 
 class ProjectsScreen extends StatefulWidget {
   const ProjectsScreen({super.key});
@@ -13,11 +15,13 @@ class ProjectsScreen extends StatefulWidget {
 }
 
 class _ProjectsScreenState extends State<ProjectsScreen> {
+  String? _selectedStatus;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProjectProvider>().loadProjects();
+      context.read<IdeaProvider>().loadIdeas();
     });
   }
 
@@ -27,34 +31,44 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
       appBar: AppBar(
         title: const Text('选题'),
       ),
-      body: Consumer<ProjectProvider>(
-        builder: (context, provider, _) {
-          final projects = provider.allProjects;
+      body: Consumer2<IdeaProvider, CategoryProvider>(
+        builder: (context, ideaProvider, categoryProvider, _) {
+          // 筛选：只显示非灵感状态的灵感（策划中/制作中/已完成）
+          var projects = ideaProvider.allIdeas
+              .where((idea) => idea.status != IdeaStatus.idea)
+              .toList();
+
+          // 状态筛选
+          if (_selectedStatus != null) {
+            projects = projects
+                .where((idea) => idea.status.name == _selectedStatus)
+                .toList();
+          }
 
           if (projects.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.folder_outlined,
                     size: 80,
-                    color: Colors.grey.shade300,
+                    color: AppTheme.textDisabled,
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     '还没有选题',
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.grey.shade400,
+                      color: AppTheme.textHint,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    '将灵感转为选题来开始跟踪',
+                  const Text(
+                    '在灵感详情页点击"开始策划"来创建选题',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.grey.shade400,
+                      color: AppTheme.textHint,
                     ),
                   ),
                 ],
@@ -71,33 +85,42 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   children: [
                     _buildStatusChip(
                       label: '全部',
-                      count: provider.allProjects.length,
-                      isSelected: provider.selectedStatus == null,
-                      onTap: () => provider.setSelectedStatus(null),
+                      count: ideaProvider.allIdeas
+                          .where((i) => i.status != IdeaStatus.idea)
+                          .length,
+                      isSelected: _selectedStatus == null,
+                      onTap: () => setState(() => _selectedStatus = null),
+                      color: AppTheme.accent,
                     ),
                     const SizedBox(width: 8),
                     _buildStatusChip(
-                      label: '待开始',
-                      count: provider.todoCount,
-                      isSelected: provider.selectedStatus == 'todo',
-                      onTap: () => provider.setSelectedStatus('todo'),
-                      color: Colors.grey,
+                      label: '策划中',
+                      count: ideaProvider.allIdeas
+                          .where((i) => i.status == IdeaStatus.planning)
+                          .length,
+                      isSelected: _selectedStatus == 'planning',
+                      onTap: () => setState(() => _selectedStatus = 'planning'),
+                      color: AppTheme.statusPlanning,
                     ),
                     const SizedBox(width: 8),
                     _buildStatusChip(
-                      label: '进行中',
-                      count: provider.inProgressCount,
-                      isSelected: provider.selectedStatus == 'in_progress',
-                      onTap: () => provider.setSelectedStatus('in_progress'),
-                      color: Colors.blue,
+                      label: '制作中',
+                      count: ideaProvider.allIdeas
+                          .where((i) => i.status == IdeaStatus.inProgress)
+                          .length,
+                      isSelected: _selectedStatus == 'inProgress',
+                      onTap: () => setState(() => _selectedStatus = 'inProgress'),
+                      color: AppTheme.statusInProgress,
                     ),
                     const SizedBox(width: 8),
                     _buildStatusChip(
                       label: '已完成',
-                      count: provider.completedCount,
-                      isSelected: provider.selectedStatus == 'completed',
-                      onTap: () => provider.setSelectedStatus('completed'),
-                      color: Colors.green,
+                      count: ideaProvider.allIdeas
+                          .where((i) => i.status == IdeaStatus.completed)
+                          .length,
+                      isSelected: _selectedStatus == 'completed',
+                      onTap: () => setState(() => _selectedStatus = 'completed'),
+                      color: AppTheme.statusCompleted,
                     ),
                   ],
                 ),
@@ -108,8 +131,8 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: projects.length,
                   itemBuilder: (context, index) {
-                    final project = projects[index];
-                    return _buildProjectCard(project);
+                    final idea = projects[index];
+                    return _buildProjectCard(idea, categoryProvider);
                   },
                 ),
               ),
@@ -125,16 +148,14 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     required int count,
     required bool isSelected,
     required VoidCallback onTap,
-    Color? color,
+    required Color color,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (color ?? AppTheme.primaryStart)
-              : (color ?? AppTheme.primaryStart).withOpacity(0.1),
+          color: isSelected ? color : color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -142,7 +163,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             Text(
               label,
               style: TextStyle(
-                color: isSelected ? Colors.white : (color ?? AppTheme.primaryStart),
+                color: isSelected ? Colors.white : color,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -150,7 +171,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             Text(
               '$count',
               style: TextStyle(
-                color: isSelected ? Colors.white70 : (color ?? AppTheme.primaryStart),
+                color: isSelected ? Colors.white70 : color,
                 fontSize: 12,
               ),
             ),
@@ -160,45 +181,36 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
     );
   }
 
-  Widget _buildProjectCard(project) {
+  Widget _buildProjectCard(Idea idea, CategoryProvider categoryProvider) {
     final dateFormat = DateFormat('MM/dd');
 
     Color statusColor;
     String statusText;
     IconData statusIcon;
 
-    switch (project.status) {
-      case 'in_progress':
-        statusColor = Colors.blue;
-        statusText = '进行中';
+    switch (idea.status) {
+      case IdeaStatus.planning:
+        statusColor = AppTheme.statusPlanning;
+        statusText = '策划中';
+        statusIcon = Icons.edit_calendar_outlined;
+        break;
+      case IdeaStatus.inProgress:
+        statusColor = AppTheme.statusInProgress;
+        statusText = '制作中';
         statusIcon = Icons.play_circle_outline;
         break;
-      case 'completed':
-        statusColor = Colors.green;
+      case IdeaStatus.completed:
+        statusColor = AppTheme.statusCompleted;
         statusText = '已完成';
         statusIcon = Icons.check_circle_outline;
         break;
       default:
         statusColor = Colors.grey;
-        statusText = '待开始';
-        statusIcon = Icons.radio_button_unchecked;
+        statusText = '灵感';
+        statusIcon = Icons.lightbulb_outline;
     }
 
-    Color recordingColor;
-    String recordingText;
-    switch (project.recordingStatus) {
-      case 'recording':
-        recordingColor = Colors.orange;
-        recordingText = '拍摄中';
-        break;
-      case 'recorded':
-        recordingColor = Colors.green;
-        recordingText = '已拍摄';
-        break;
-      default:
-        recordingColor = Colors.grey;
-        recordingText = '未拍摄';
-    }
+    final category = categoryProvider.getCategoryById(idea.category);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -207,7 +219,7 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProjectDetailScreen(projectId: project.id),
+              builder: (context) => IdeaDetailScreen(ideaId: idea.id),
             ),
           );
         },
@@ -219,15 +231,24 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      project.title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                  // 分类标签
+                  if (category != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppTheme.rockGrayLight,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        category.name,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppTheme.rockGrayDark,
+                        ),
                       ),
                     ),
-                  ),
+                  const Spacer(),
+                  // 状态标签
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
@@ -252,10 +273,19 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                   ),
                 ],
               ),
-              if (project.description.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              // 标题
+              Text(
+                idea.title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              if (idea.content.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(
-                  project.description,
+                  idea.content,
                   style: const TextStyle(
                     color: AppTheme.textSecondary,
                   ),
@@ -264,79 +294,17 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
                 ),
               ],
               const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(Icons.videocam_outlined, size: 16, color: recordingColor),
-                  const SizedBox(width: 4),
-                  Text(
-                    recordingText,
-                    style: TextStyle(
-                      color: recordingColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    dateFormat.format(project.updatedAt),
-                    style: const TextStyle(
-                      color: AppTheme.textSecondary,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+              // 日期
+              Text(
+                dateFormat.format(idea.createdAt),
+                style: const TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _showAddProjectDialog() {
-    final titleController = TextEditingController();
-    final descController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('新建选题'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: '选题标题',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(
-                labelText: '描述',
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              if (titleController.text.isNotEmpty) {
-                await context.read<ProjectProvider>().addProject(
-                      title: titleController.text,
-                      description: descController.text,
-                    );
-                if (context.mounted) Navigator.pop(context);
-              }
-            },
-            child: const Text('创建'),
-          ),
-        ],
       ),
     );
   }

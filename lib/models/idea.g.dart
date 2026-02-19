@@ -16,6 +16,18 @@ class IdeaAdapter extends TypeAdapter<Idea> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
+
+    // 数据迁移：兼容旧版本 (旧版本 isProject 是 bool，新版本 status 是 IdeaStatus)
+    IdeaStatus status;
+    if (fields[7] is bool) {
+      // 旧版本数据：isProject bool -> 转换为 status
+      final isProject = fields[7] as bool;
+      status = isProject ? IdeaStatus.planning : IdeaStatus.idea;
+    } else {
+      // 新版本数据
+      status = fields[7] as IdeaStatus;
+    }
+
     return Idea(
       id: fields[0] as String,
       title: fields[1] as String,
@@ -24,7 +36,7 @@ class IdeaAdapter extends TypeAdapter<Idea> {
       audioPath: fields[4] as String?,
       category: fields[5] as String,
       createdAt: fields[6] as DateTime,
-      isProject: fields[7] as bool,
+      status: status,
       projectId: fields[8] as String?,
       recordingType: fields[9] as String,
     );
@@ -49,7 +61,7 @@ class IdeaAdapter extends TypeAdapter<Idea> {
       ..writeByte(6)
       ..write(obj.createdAt)
       ..writeByte(7)
-      ..write(obj.isProject)
+      ..write(obj.status)
       ..writeByte(8)
       ..write(obj.projectId)
       ..writeByte(9)
@@ -63,6 +75,55 @@ class IdeaAdapter extends TypeAdapter<Idea> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is IdeaAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class IdeaStatusAdapter extends TypeAdapter<IdeaStatus> {
+  @override
+  final int typeId = 3;
+
+  @override
+  IdeaStatus read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return IdeaStatus.idea;
+      case 1:
+        return IdeaStatus.planning;
+      case 2:
+        return IdeaStatus.inProgress;
+      case 3:
+        return IdeaStatus.completed;
+      default:
+        return IdeaStatus.idea;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, IdeaStatus obj) {
+    switch (obj) {
+      case IdeaStatus.idea:
+        writer.writeByte(0);
+        break;
+      case IdeaStatus.planning:
+        writer.writeByte(1);
+        break;
+      case IdeaStatus.inProgress:
+        writer.writeByte(2);
+        break;
+      case IdeaStatus.completed:
+        writer.writeByte(3);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is IdeaStatusAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

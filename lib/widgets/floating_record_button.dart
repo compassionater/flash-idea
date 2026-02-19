@@ -11,81 +11,46 @@ class FloatingRecordButton extends StatefulWidget {
 }
 
 class _FloatingRecordButtonState extends State<FloatingRecordButton>
-    with TickerProviderStateMixin {
-  late AnimationController _breathingController;
-  late Animation<double> _breathingAnimation;
-  late Animation<double> _glowAnimation;
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
 
-  late AnimationController _morphController;
-  late Animation<double> _morphAnimation;
-
-  late AnimationController _clickController;
-  late Animation<double> _clickScaleAnimation;
-
-  // 深灰黑色
-  static const Color buttonColor = Color(0xFF121212);
-  // 青色 Teal
-  static const Color tealGlow = Color(0xFF26A69A);
+  // 品牌青色
+  static const Color accentColor = Color(0xFF0891B2);
+  // 哑光灰阴影
+  static const Color shadowColor = Color(0xFF94A3B8);
 
   @override
   void initState() {
     super.initState();
-
-    // 呼吸动画 - 3秒周期
-    _breathingController = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _breathingAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
-      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
-    );
-
-    _glowAnimation = Tween<double>(begin: 0.2, end: 0.5).animate(
-      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
-    );
-
-    // 液态变形动画
-    _morphController = AnimationController(
-      duration: const Duration(seconds: 4),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _morphAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _morphController, curve: Curves.easeInOut),
-    );
-
-    // 点击反馈动画
-    _clickController = AnimationController(
+    _controller = AnimationController(
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
 
-    _clickScaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
-      CurvedAnimation(parent: _clickController, curve: Curves.easeOutCubic),
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
   }
 
   @override
   void dispose() {
-    _breathingController.dispose();
-    _morphController.dispose();
-    _clickController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   void _handleTapDown(TapDownDetails details) {
     HapticFeedback.lightImpact();
-    _clickController.forward();
+    _controller.forward();
   }
 
   void _handleTapUp(TapUpDetails details) {
-    _clickController.reverse();
+    _controller.reverse();
     widget.onPressed();
   }
 
   void _handleTapCancel() {
-    _clickController.reverse();
+    _controller.reverse();
   }
 
   @override
@@ -95,71 +60,38 @@ class _FloatingRecordButtonState extends State<FloatingRecordButton>
       onTapUp: _handleTapUp,
       onTapCancel: _handleTapCancel,
       child: AnimatedBuilder(
-        animation: Listenable.merge([
-          _breathingController,
-          _morphController,
-          _clickController,
-        ]),
+        animation: _controller,
         builder: (context, child) {
-          final breathScale = _breathingAnimation.value;
-          final clickScale = _clickScaleAnimation.value;
-          final morphValue = _morphAnimation.value;
+          final isPressed = _controller.value;
 
-          // 液态变形 - 轻微的不规则圆角
-          final borderRadius = BorderRadius.circular(
-            40 + (morphValue * 5 - 2.5),
-          );
+          // 按下时阴影变深、更实
+          final blurRadius = 30.0 - (isPressed * 15.0); // 30 -> 15
+          final shadowOpacity = 0.2 + (isPressed * 0.15); // 0.2 -> 0.35
+          final offsetY = 12.0 - (isPressed * 6.0); // 12 -> 6
+          final spreadRadius = isPressed > 0.5 ? -5.0 : 0.0;
 
           return Transform.scale(
-            scale: breathScale * clickScale,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // 外层液态光晕
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 100),
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    borderRadius: borderRadius,
-                    boxShadow: [
-                      BoxShadow(
-                        color: tealGlow.withOpacity(
-                          _glowAnimation.value * 0.5,
-                        ),
-                        blurRadius: 25 + (morphValue * 10),
-                        spreadRadius: 5 + (morphValue * 5),
-                      ),
-                    ],
+            scale: _scaleAnimation.value,
+            child: Container(
+              width: 72.0,
+              height: 72.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: shadowColor.withOpacity(shadowOpacity),
+                    blurRadius: blurRadius,
+                    spreadRadius: spreadRadius,
+                    offset: Offset(0, offsetY),
                   ),
-                ),
-                // 主体按钮 - 深灰黑色液态
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 50),
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.rectangle,
-                    borderRadius: BorderRadius.circular(
-                      40 + (morphValue * 3 - 1.5),
-                    ),
-                    color: buttonColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: tealGlow.withOpacity(0.2),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.add_rounded,
-                    color: Colors.white,
-                    size: 40,
-                  ),
-                ),
-              ],
+                ],
+              ),
+              child: const Icon(
+                Icons.add_rounded,
+                color: accentColor,
+                size: 32.0,
+              ),
             ),
           );
         },

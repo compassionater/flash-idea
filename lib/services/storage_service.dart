@@ -17,6 +17,7 @@ class StorageService {
 
     // 注册适配器
     Hive.registerAdapter(IdeaAdapter());
+    Hive.registerAdapter(IdeaStatusAdapter());
     Hive.registerAdapter(ProjectAdapter());
     Hive.registerAdapter(CategoryAdapter());
 

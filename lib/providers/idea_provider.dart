@@ -70,9 +70,15 @@ class IdeaProvider extends ChangeNotifier {
   Future<void> convertToProject(String ideaId) async {
     final idea = _ideas.firstWhere((i) => i.id == ideaId);
     final updatedIdea = idea.copyWith(
-      isProject: true,
+      status: IdeaStatus.planning,
       projectId: ideaId,
     );
+    await updateIdea(updatedIdea);
+  }
+
+  Future<void> updateIdeaStatus(String ideaId, IdeaStatus newStatus) async {
+    final idea = _ideas.firstWhere((i) => i.id == ideaId);
+    final updatedIdea = idea.copyWith(status: newStatus);
     await updateIdea(updatedIdea);
   }
 

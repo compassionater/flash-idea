@@ -2,6 +2,22 @@ import 'package:hive/hive.dart';
 
 part 'idea.g.dart';
 
+/// 灵感状态枚举
+@HiveType(typeId: 3)
+enum IdeaStatus {
+  @HiveField(0)
+  idea,      // 灵感 - 默认状态
+
+  @HiveField(1)
+  planning,  // 策划中
+
+  @HiveField(2)
+  inProgress, // 制作中
+
+  @HiveField(3)
+  completed,  // 已完成
+}
+
 @HiveType(typeId: 0)
 class Idea extends HiveObject {
   @HiveField(0)
@@ -26,7 +42,7 @@ class Idea extends HiveObject {
   DateTime createdAt;
 
   @HiveField(7)
-  bool isProject;
+  IdeaStatus status; // 新增：统一状态
 
   @HiveField(8)
   String? projectId;
@@ -42,7 +58,7 @@ class Idea extends HiveObject {
     this.audioPath,
     required this.category,
     required this.createdAt,
-    this.isProject = false,
+    this.status = IdeaStatus.idea, // 默认是灵感状态
     this.projectId,
     this.recordingType = 'text',
   });
@@ -55,7 +71,7 @@ class Idea extends HiveObject {
     String? audioPath,
     String? category,
     DateTime? createdAt,
-    bool? isProject,
+    IdeaStatus? status,
     String? projectId,
     String? recordingType,
   }) {
@@ -67,9 +83,18 @@ class Idea extends HiveObject {
       audioPath: audioPath ?? this.audioPath,
       category: category ?? this.category,
       createdAt: createdAt ?? this.createdAt,
-      isProject: isProject ?? this.isProject,
+      status: status ?? this.status,
       projectId: projectId ?? this.projectId,
       recordingType: recordingType ?? this.recordingType,
     );
   }
+
+  // 便捷属性：是否为灵感状态
+  bool get isIdea => status == IdeaStatus.idea;
+
+  // 便捷属性：是否为进行中状态（策划中或制作中）
+  bool get isActive => status == IdeaStatus.planning || status == IdeaStatus.inProgress;
+
+  // 便捷属性：是否已完成
+  bool get isCompleted => status == IdeaStatus.completed;
 }

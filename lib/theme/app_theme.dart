@@ -1,25 +1,54 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // 主色调 - 青色 Teal
-  static const Color accent = Color(0xFF26A69A);
+  // ═══════════════════════════════════════════════
+  // 品牌色 - Cyan 青 (#0891B2)
+  // ═══════════════════════════════════════════════
+  static const Color accent = Color(0xFF0891B2);       // 品牌主色
+  static const Color accentLight = Color(0xFF06B6D4);   // 品牌浅色
+  static const Color accentLighter = Color(0xFF22D3EE); // 品牌更浅
+  static const Color accentTint = Color(0xFFF0FDFA);    // 品牌极淡底色
+
+  // 向后兼容
   static const Color primaryStart = accent;
-  static const Color primaryEnd = Color(0xFF4DB6AC);
+  static const Color primaryEnd = accentLight;
 
-  // 岩灰配色 - 单色系
+  // ═══════════════════════════════════════════════
+  // 中性色 - Slate 板岩灰
+  // ═══════════════════════════════════════════════
   static const Color rockGrayLight = Color(0xFFF1F5F9);  // 浅岩灰背景
-  static const Color rockGrayDark = Color(0xFF475569);   // 深岩灰文字
+  static const Color rockGrayDark = Color(0xFF475569);    // 深岩灰
 
+  // ═══════════════════════════════════════════════
   // 背景色
-  static const Color background = Color(0xFFF8F9FA);
+  // ═══════════════════════════════════════════════
+  static const Color background = Color(0xFFF8FAFC);      // 极淡冷灰白
   static const Color surfaceColor = Colors.white;
 
+  // ═══════════════════════════════════════════════
   // 文字颜色
-  static const Color textPrimary = rockGrayDark;
-  static const Color textSecondary = Color(0xFF718096);
+  // ═══════════════════════════════════════════════
+  static const Color textPrimary = Color(0xFF334155);     // 深板岩 - 标题/正文
+  static const Color textSecondary = Color(0xFF64748B);   // 中板岩 - 次要文字
+  static const Color textHint = Color(0xFF94A3B8);        // 浅板岩 - 提示文字
+  static const Color textDisabled = Color(0xFFCBD5E1);    // 极浅 - 禁用文字
 
-  // 次要颜色
-  static const Color secondary = Color(0xFF80CBC4);
+  // ═══════════════════════════════════════════════
+  // 状态色 - 选题进度
+  // ═══════════════════════════════════════════════
+  static const Color statusPlanning = Color(0xFFF59E0B);   // 琥珀色 - 策划中
+  static const Color statusInProgress = Color(0xFF3B82F6); // 蓝色 - 制作中
+  static const Color statusCompleted = Color(0xFF10B981);  // 翡翠绿 - 已完成
+
+  // ═══════════════════════════════════════════════
+  // 功能色
+  // ═══════════════════════════════════════════════
+  static const Color divider = Color(0xFFE2E8F0);         // 分割线
+  static const Color disabledBg = Color(0xFFE2E8F0);      // 禁用按钮背景
+  static const Color danger = Color(0xFFEF4444);           // 危险/删除
+
+  // 次要颜色 (向后兼容)
+  static const Color secondary = Color(0xFF67E8F9);
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -77,7 +106,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200),
+          side: const BorderSide(color: divider),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -100,7 +129,7 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: const BorderSide(color: divider),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -124,13 +153,13 @@ class AppTheme {
 
   // 渐变色
   static LinearGradient get primaryGradient => const LinearGradient(
-        colors: [accent, Color(0xFF4DB6AC)],
+        colors: [accent, accentLight],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
 
   static LinearGradient get buttonGradient => const LinearGradient(
-        colors: [accent, Color(0xFF4DB6AC)],
+        colors: [accent, accentLight],
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
       );

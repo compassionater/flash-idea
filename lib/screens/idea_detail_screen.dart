@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../providers/idea_provider.dart';
-import '../providers/project_provider.dart';
+
 import '../providers/category_provider.dart';
 import '../models/idea.dart';
 import '../theme/app_theme.dart';
@@ -71,21 +71,21 @@ class IdeaDetailScreen extends StatelessWidget {
                       await ideaProvider.deleteIdea(idea.id);
                       if (context.mounted) Navigator.pop(context);
                     }
-                  } else if (value == 'convert') {
-                    if (!idea.isProject) {
-                      await _showConvertToProjectDialog(context, idea);
+                  } else if (value == 'start') {
+                    if (idea.status == IdeaStatus.idea) {
+                      await _startPlanning(context, idea);
                     }
                   }
                 },
                 itemBuilder: (context) => [
-                  if (!idea.isProject)
+                  if (idea.status == IdeaStatus.idea)
                     const PopupMenuItem(
-                      value: 'convert',
+                      value: 'start',
                       child: Row(
                         children: [
-                          Icon(Icons.folder_outlined),
+                          Icon(Icons.play_arrow_outlined),
                           SizedBox(width: 8),
-                          Text('转为选题'),
+                          Text('开始策划'),
                         ],
                       ),
                     ),
@@ -184,40 +184,71 @@ class IdeaDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                // 选题标记
-                if (idea.isProject) ...[
+                // 状态显示 - 非灵感状态显示状态进度条
+                if (idea.status != IdeaStatus.idea) ...[
                   const SizedBox(height: 24),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryStart.withOpacity(0.1),
+                      color: AppTheme.accent.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.folder, color: AppTheme.primaryStart),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '已转为选题',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.primaryStart,
-                                ),
+                        Row(
+                          children: [
+                            Icon(
+                              idea.status == IdeaStatus.completed
+                                  ? Icons.check_circle
+                                  : Icons.folder,
+                              color: AppTheme.accent,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _getStatusLabel(idea.status),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.accent,
                               ),
-                              Text(
-                                '此灵感已被添加到选题中',
-                                style: TextStyle(
-                                  color: AppTheme.textSecondary,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                        const SizedBox(height: 12),
+                        // 状态步骤条
+                        Row(
+                          children: [
+                            _buildStatusDot(IdeaStatus.idea, idea.status),
+                            _buildStatusLine(idea.status, IdeaStatus.planning),
+                            _buildStatusDot(IdeaStatus.planning, idea.status),
+                            _buildStatusLine(idea.status, IdeaStatus.inProgress),
+                            _buildStatusDot(IdeaStatus.inProgress, idea.status),
+                            _buildStatusLine(idea.status, IdeaStatus.completed),
+                            _buildStatusDot(IdeaStatus.completed, idea.status),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // 状态标签
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text('灵感', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+                            Text('策划中', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+                            Text('制作中', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+                            Text('已完成', style: TextStyle(fontSize: 10, color: AppTheme.textSecondary)),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // 状态更新按钮
+                        if (idea.status != IdeaStatus.completed)
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: () => _showStatusUpdateDialog(context, idea),
+                              child: const Text('更新状态'),
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -320,60 +351,108 @@ class IdeaDetailScreen extends StatelessWidget {
     }
   }
 
-  Future<void> _showConvertToProjectDialog(BuildContext context, Idea idea) async {
-    final titleController = TextEditingController(text: idea.title);
-    final descController = TextEditingController(text: idea.content);
+  Future<void> _startPlanning(BuildContext context, Idea idea) async {
+    // 直接将灵感状态改为策划中，灵感就是项目
+    await context.read<IdeaProvider>().updateIdeaStatus(idea.id, IdeaStatus.planning);
 
-    final result = await showDialog<bool>(
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('已开始策划')),
+      );
+    }
+  }
+
+  // 获取状态标签
+  String _getStatusLabel(IdeaStatus status) {
+    switch (status) {
+      case IdeaStatus.idea:
+        return '灵感';
+      case IdeaStatus.planning:
+        return '策划中';
+      case IdeaStatus.inProgress:
+        return '制作中';
+      case IdeaStatus.completed:
+        return '已完成';
+    }
+  }
+
+  // 构建状态圆点
+  Widget _buildStatusDot(IdeaStatus status, IdeaStatus currentStatus) {
+    final isActive = status.index <= currentStatus.index;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+      width: isActive ? 14 : 12,
+      height: isActive ? 14 : 12,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isActive ? AppTheme.accent : AppTheme.rockGrayLight,
+        border: Border.all(
+          color: isActive ? AppTheme.accent : AppTheme.rockGrayLight,
+          width: 2,
+        ),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: AppTheme.accent.withOpacity(0.3),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                )
+              ]
+            : [],
+      ),
+    );
+  }
+
+  // 构建状态连接线
+  Widget _buildStatusLine(IdeaStatus currentStatus, IdeaStatus nextStatus) {
+    final isActive = currentStatus.index >= nextStatus.index;
+    return Expanded(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOut,
+        height: isActive ? 3 : 2,
+        decoration: BoxDecoration(
+          color: isActive ? AppTheme.accent : AppTheme.rockGrayLight,
+          borderRadius: BorderRadius.circular(1.5),
+        ),
+      ),
+    );
+  }
+
+  // 显示状态更新对话框
+  Future<void> _showStatusUpdateDialog(BuildContext context, Idea idea) async {
+    final result = await showDialog<IdeaStatus>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('转为选题'),
+        title: const Text('更新状态'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(
-                labelText: '选题标题',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(
-                labelText: '选题描述',
-              ),
-              maxLines: 3,
-            ),
-          ],
+          children: IdeaStatus.values.map((status) {
+            return RadioListTile<IdeaStatus>(
+              title: Text(_getStatusLabel(status)),
+              value: status,
+              groupValue: idea.status,
+              onChanged: (value) {
+                Navigator.pop(context, value);
+              },
+            );
+          }).toList(),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
+            onPressed: () => Navigator.pop(context),
             child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('确认'),
           ),
         ],
       ),
     );
 
-    if (result == true && context.mounted) {
-      // 创建选题
-      await context.read<ProjectProvider>().addProject(
-            title: titleController.text,
-            description: descController.text,
-            ideaIds: [idea.id],
-          );
-
-      // 更新灵感
-      await context.read<IdeaProvider>().convertToProject(idea.id);
-
+    if (result != null && context.mounted) {
+      await context.read<IdeaProvider>().updateIdeaStatus(idea.id, result);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('已转为选题')),
+          SnackBar(content: Text('状态已更新为: ${_getStatusLabel(result)}')),
         );
       }
     }

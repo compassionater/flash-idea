@@ -112,25 +112,35 @@ class IdeaCard extends StatelessWidget {
                   ),
                 ),
               ],
-              // 项目标记
-              if (idea.isProject) ...[
+              // 状态标记 - 非灵感状态显示
+              if (idea.status != IdeaStatus.idea) ...[
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryStart.withOpacity(0.1),
+                    color: AppTheme.accent.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.folder_outlined, size: 14, color: AppTheme.accent),
-                      SizedBox(width: 4),
+                      Icon(
+                        idea.status == IdeaStatus.completed
+                            ? Icons.check_circle_outline
+                            : Icons.folder_outlined,
+                        size: 14,
+                        color: AppTheme.accent,
+                      ),
+                      const SizedBox(width: 4),
                       Text(
-                        '已转为选题',
-                        style: TextStyle(
+                        idea.status == IdeaStatus.planning
+                            ? '策划中'
+                            : idea.status == IdeaStatus.inProgress
+                                ? '制作中'
+                                : '已完成',
+                        style: const TextStyle(
                           fontSize: 12,
-                          color: AppTheme.primaryStart,
+                          color: AppTheme.accent,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
