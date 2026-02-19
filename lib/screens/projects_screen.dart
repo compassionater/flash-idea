@@ -212,94 +212,141 @@ class _ProjectsScreenState extends State<ProjectsScreen> {
 
     final category = categoryProvider.getCategoryById(idea.category);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => IdeaDetailScreen(ideaId: idea.id),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppTheme.divider.withOpacity(0.3),
+            width: 0.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
             ),
-          );
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+              spreadRadius: -2,
+            ),
+          ],
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => IdeaDetailScreen(ideaId: idea.id),
+              ),
+            );
+          },
+          child: Stack(
             children: [
-              Row(
-                children: [
-                  // 分类标签
-                  if (category != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.rockGrayLight,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        category.name,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppTheme.rockGrayDark,
-                        ),
-                      ),
-                    ),
-                  const Spacer(),
-                  // 状态标签
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+              // 左上角分类色彩小圆
+              Positioned(
+                top: 12,
+                left: 12,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: category != null
+                        ? Color(category.colorValue)
+                        : statusColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              // 主内容
+              Padding(
+                padding: const EdgeInsets.fromLTRB(28, 16, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Icon(statusIcon, size: 14, color: statusColor),
-                        const SizedBox(width: 4),
-                        Text(
-                          statusText,
-                          style: TextStyle(
-                            color: statusColor,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
+                        // 分类标签
+                        if (category != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Color(category.colorValue)
+                                  .withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              category.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(category.colorValue),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        // 状态标签
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: statusColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(statusIcon,
+                                  size: 14, color: statusColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                statusText,
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // 标题
-              Text(
-                idea.title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              if (idea.content.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                Text(
-                  idea.content,
-                  style: const TextStyle(
-                    color: AppTheme.textSecondary,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-              const SizedBox(height: 12),
-              // 日期
-              Text(
-                dateFormat.format(idea.createdAt),
-                style: const TextStyle(
-                  color: AppTheme.textSecondary,
-                  fontSize: 12,
+                    const SizedBox(height: 12),
+                    Text(
+                      idea.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
+                    if (idea.content.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        idea.content,
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Text(
+                      dateFormat.format(idea.createdAt),
+                      style: const TextStyle(
+                        color: AppTheme.textSecondary,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

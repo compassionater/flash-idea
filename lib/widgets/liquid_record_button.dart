@@ -128,7 +128,7 @@ class _LiquidRecordButtonState extends State<LiquidRecordButton>
   Widget _buildLiquidGlow(double size, bool isPressed) {
     final glowColor = isPressed
         ? const Color(0xFFFFFFFF)
-        : const Color(0xFF0891B2);
+        : AppTheme.accent;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 150),
@@ -160,14 +160,14 @@ class _LiquidRecordButtonState extends State<LiquidRecordButton>
 
     if (isPressed) {
       bodyColor = const Color(0xFFFFFFFF);
-      shadowColor = const Color(0xFF22D3EE);
+      shadowColor = AppTheme.accentLighter;
     } else {
       bodyColor = Color.lerp(
-        const Color(0xFF475569), // 板岩灰
-        const Color(0xFF0891B2), // 哑光青
+        AppTheme.rockGrayDark,   // 板岩灰
+        AppTheme.accent,         // 哑光青
         _morphAnimation.value,
       )!;
-      shadowColor = const Color(0xFF0891B2);
+      shadowColor = AppTheme.accent;
     }
 
     return Container(
@@ -177,16 +177,16 @@ class _LiquidRecordButtonState extends State<LiquidRecordButton>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isPressed
-              ? [const Color(0xFFFFFFFF), const Color(0xFFF0FDFA)]
+              ? [const Color(0xFFFFFFFF), AppTheme.accentTint]
               : [
                   Color.lerp(
-                    const Color(0xFF475569),
-                    const Color(0xFF06B6D4),
+                    AppTheme.rockGrayDark,
+                    AppTheme.accentLight,
                     _morphAnimation.value,
                   )!,
                   Color.lerp(
-                    const Color(0xFF64748B),
-                    const Color(0xFF0891B2),
+                    AppTheme.textSecondary,
+                    AppTheme.accent,
                     _morphAnimation.value,
                   )!,
                 ],
@@ -217,7 +217,7 @@ class _LiquidRecordButtonState extends State<LiquidRecordButton>
       duration: const Duration(milliseconds: 150),
       child: Icon(
         Icons.add_rounded,
-        color: isPressed ? const Color(0xFF0891B2) : Colors.white,
+        color: isPressed ? AppTheme.accent : Colors.white,
         size: 64,
       ),
     );

@@ -25,71 +25,89 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 250),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        transitionBuilder: (child, animation) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-        child: KeyedSubtree(
-          key: ValueKey<int>(_currentIndex),
-          child: _screens[_currentIndex],
-        ),
-      ),
-      // 毛玻璃底部条
-      bottomNavigationBar: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.85),
-              border: Border(
-                top: BorderSide(
-                  color: AppTheme.divider.withOpacity(0.5),
-                  width: 0.5,
-                ),
+      body: Stack(
+        children: [
+          // 主页面内容
+          Positioned.fill(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: child,
+                );
+              },
+              child: KeyedSubtree(
+                key: ValueKey<int>(_currentIndex),
+                child: _screens[_currentIndex],
               ),
             ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _NavItem(
-                      index: 0,
-                      icon: Icons.home_outlined,
-                      activeIcon: Icons.home,
-                      label: '首页',
-                      isSelected: _currentIndex == 0,
-                      onTap: () => setState(() => _currentIndex = 0),
+          ),
+          // 浮动底部导航栏
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.75),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.4),
+                      width: 0.5,
                     ),
-                    _NavItem(
-                      index: 1,
-                      icon: Icons.lightbulb_outlined,
-                      activeIcon: Icons.lightbulb,
-                      label: '灵感',
-                      isSelected: _currentIndex == 1,
-                      onTap: () => setState(() => _currentIndex = 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.08),
+                        blurRadius: 24,
+                        offset: const Offset(0, 4),
+                        spreadRadius: -4,
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _NavItem(
+                          index: 0,
+                          icon: Icons.home_outlined,
+                          activeIcon: Icons.home_rounded,
+                          label: '首页',
+                          isSelected: _currentIndex == 0,
+                          onTap: () => setState(() => _currentIndex = 0),
+                        ),
+                        _NavItem(
+                          index: 1,
+                          icon: Icons.lightbulb_outlined,
+                          activeIcon: Icons.lightbulb_rounded,
+                          label: '灵感',
+                          isSelected: _currentIndex == 1,
+                          onTap: () => setState(() => _currentIndex = 1),
+                        ),
+                        _NavItem(
+                          index: 2,
+                          icon: Icons.folder_outlined,
+                          activeIcon: Icons.folder_rounded,
+                          label: '选题',
+                          isSelected: _currentIndex == 2,
+                          onTap: () => setState(() => _currentIndex = 2),
+                        ),
+                      ],
                     ),
-                    _NavItem(
-                      index: 2,
-                      icon: Icons.folder_outlined,
-                      activeIcon: Icons.folder,
-                      label: '选题',
-                      isSelected: _currentIndex == 2,
-                      onTap: () => setState(() => _currentIndex = 2),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
       drawer: _buildDrawer(),
     );
@@ -207,11 +225,11 @@ class _NavItemState extends State<_NavItem> with SingleTickerProviderStateMixin 
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack), // 更优雅的弹簧
     );
   }
 
@@ -235,9 +253,11 @@ class _NavItemState extends State<_NavItem> with SingleTickerProviderStateMixin 
       onTap: widget.onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        // 固定高度和宽度，防止跳动
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedBuilder(
               animation: _scaleAnimation,
@@ -248,10 +268,15 @@ class _NavItemState extends State<_NavItem> with SingleTickerProviderStateMixin 
                 );
               },
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeOut,
+                switchOutCurve: Curves.easeIn,
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
                 child: Icon(
                   widget.isSelected ? widget.activeIcon : widget.icon,
-                  key: ValueKey(widget.isSelected),
+                  key: ValueKey(widget.isSelected ? 'selected' : 'unselected'),
                   color: widget.isSelected ? AppTheme.accent : AppTheme.textSecondary,
                   size: 24,
                 ),
@@ -259,11 +284,13 @@ class _NavItemState extends State<_NavItem> with SingleTickerProviderStateMixin 
             ),
             const SizedBox(height: 4),
             AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
               style: TextStyle(
                 color: widget.isSelected ? AppTheme.accent : AppTheme.textSecondary,
                 fontSize: 12,
-                fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontFamily: 'Roboto', // 指定字体防止宽度跳动
+                fontWeight: FontWeight.w500, // 统一字重，仅改变颜色
               ),
               child: Text(widget.label),
             ),

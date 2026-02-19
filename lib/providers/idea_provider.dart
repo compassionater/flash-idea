@@ -82,6 +82,12 @@ class IdeaProvider extends ChangeNotifier {
     await updateIdea(updatedIdea);
   }
 
+  Future<void> updateIdeaCategory(String ideaId, String newCategoryId) async {
+    final idea = _ideas.firstWhere((i) => i.id == ideaId);
+    final updatedIdea = idea.copyWith(category: newCategoryId);
+    await updateIdea(updatedIdea);
+  }
+
   List<Idea> searchIdeas(String query) {
     if (query.isEmpty) return _ideas;
     final lowerQuery = query.toLowerCase();

@@ -56,7 +56,7 @@ class _CaptureScreenState extends State<CaptureScreen> {
     await context.read<IdeaProvider>().addIdea(
       title: title,
       content: content,
-      category: 'other',
+      category: 'uncategorized', // Post-Classification workflow
       recordingType: 'text',
     );
 
@@ -140,12 +140,19 @@ class _CaptureScreenState extends State<CaptureScreen> {
                         filter: ImageFilter.blur(sigmaX: 20.0, sigmaY: 20.0),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.15),
+                            color: const Color(0xFFF0FAFB).withOpacity(0.85),
                             borderRadius: BorderRadius.circular(24.0),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
-                              width: 0.5,
+                              color: AppTheme.accent.withOpacity(0.08),
+                              width: 1,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.accent.withOpacity(0.06),
+                                blurRadius: 24,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),

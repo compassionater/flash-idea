@@ -97,10 +97,10 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
   void _showAddCategoryDialog() {
     final nameController = TextEditingController();
-    int selectedColor = AppTheme.primaryStart.toARGB32();
+    int selectedColor = AppTheme.accent.toARGB32();
 
     final colors = [
-      AppTheme.primaryStart,
+      AppTheme.accent,
       Colors.green,
       Colors.blue,
       Colors.purple,
